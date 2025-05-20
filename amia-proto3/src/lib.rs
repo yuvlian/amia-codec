@@ -6,9 +6,9 @@ use std::io::{self, Cursor, Read, Write};
 
 pub trait Protobuf: Sized + Default {
     fn encode_to_writer<W: Write>(&self, writer: &mut W) -> io::Result<()>;
-    fn encoded_len(&self) -> usize;
+    // fn encoded_len(&self) -> usize;
     fn encode_to_vec(&self) -> Vec<u8> {
-        let mut buffer = Vec::with_capacity(self.encoded_len());
+        let mut buffer = Vec::new();
         self.encode_to_writer(&mut buffer).unwrap();
         buffer
     }
