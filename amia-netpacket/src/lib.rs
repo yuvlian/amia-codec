@@ -1,5 +1,8 @@
 pub mod hsr;
 
+#[cfg(feature = "kcp")]
+pub mod op;
+
 #[derive(Debug)]
 pub enum PacketError {
     TooShort,

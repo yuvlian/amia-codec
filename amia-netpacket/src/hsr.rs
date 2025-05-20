@@ -19,6 +19,18 @@ const TAIL_MAGIC_LEN: usize = size_of::<u32>();
 
 const OVERHEAD: usize = HEAD_MAGIC_LEN + CMD_LEN + HEAD_SIZE_LEN + BODY_SIZE_LEN + TAIL_MAGIC_LEN;
 
+const HM_START: usize = 0;
+const HM_END: usize = HM_START + HEAD_MAGIC_LEN;
+
+const CMD_START: usize = HM_END;
+const CMD_END: usize = CMD_START + CMD_LEN;
+
+const HS_START: usize = CMD_END;
+const HS_END: usize = HS_START + HEAD_SIZE_LEN;
+
+const BS_START: usize = HS_END;
+const BS_END: usize = BS_START + BODY_SIZE_LEN;
+
 #[derive(Debug)]
 pub struct NetPacket {
     pub cmd: u16,
@@ -64,18 +76,6 @@ impl TryFrom<&[u8]> for NetPacket {
         if data.len() < OVERHEAD {
             return Err(PacketError::TooShort);
         }
-
-        const HM_START: usize = 0;
-        const HM_END: usize = HM_START + HEAD_MAGIC_LEN;
-
-        const CMD_START: usize = HM_END;
-        const CMD_END: usize = CMD_START + CMD_LEN;
-
-        const HS_START: usize = CMD_END;
-        const HS_END: usize = HS_START + HEAD_SIZE_LEN;
-
-        const BS_START: usize = HS_END;
-        const BS_END: usize = BS_START + BODY_SIZE_LEN;
 
         if &data[HM_START..HM_END] != HEAD_MAGIC {
             return Err(PacketError::InvalidHeadMagic);
@@ -124,18 +124,6 @@ impl From<NetPacket> for Box<[u8]> {
         let total_len = OVERHEAD + head_len + body_len;
         let mut out = vec![0u8; total_len];
 
-        const HM_START: usize = 0;
-        const HM_END: usize = HEAD_MAGIC_LEN;
-
-        const CMD_START: usize = HM_END;
-        const CMD_END: usize = CMD_START + CMD_LEN;
-
-        const HS_START: usize = CMD_END;
-        const HS_END: usize = HS_START + HEAD_SIZE_LEN;
-
-        const BS_START: usize = HS_END;
-        const BS_END: usize = BS_START + BODY_SIZE_LEN;
-
         (&mut out[HM_START..HM_END]).copy_from_slice(&HEAD_MAGIC);
         BE::write_u16(&mut out[CMD_START..CMD_END], value.cmd);
         BE::write_u16(&mut out[HS_START..HS_END], head_len as u16);
@@ -165,18 +153,6 @@ impl From<NetPacket> for Vec<u8> {
 
         let total_len = OVERHEAD + head_len + body_len;
         let mut out = vec![0u8; total_len];
-
-        const HM_START: usize = 0;
-        const HM_END: usize = HEAD_MAGIC_LEN;
-
-        const CMD_START: usize = HM_END;
-        const CMD_END: usize = CMD_START + CMD_LEN;
-
-        const HS_START: usize = CMD_END;
-        const HS_END: usize = HS_START + HEAD_SIZE_LEN;
-
-        const BS_START: usize = HS_END;
-        const BS_END: usize = BS_START + BODY_SIZE_LEN;
 
         (&mut out[HM_START..HM_END]).copy_from_slice(&HEAD_MAGIC);
         BE::write_u16(&mut out[CMD_START..CMD_END], value.cmd);
