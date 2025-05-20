@@ -1,0 +1,8 @@
+[workspace]
+resolver = "3"
+members = ["amia-base64", "amia-netpacket", "amia-proto3"]
+
+[workspace.package]
+edition = "2024"
+license = "Apache-2.0"
+repository = "https://github.com/yuvlian/amia-codec"
