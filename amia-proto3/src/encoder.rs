@@ -1,4 +1,5 @@
 use crate::{Protobuf, WireType};
+use std::collections::HashMap;
 use std::io::{self, Write};
 
 #[inline]
@@ -299,7 +300,7 @@ pub fn encode_message<W: Write, M: Protobuf>(
 #[inline]
 pub fn encode_map<K, V, W, IK, IV>(
     field_number: u32,
-    map: impl IntoIterator<Item = (K, V)>,
+    map: HashMap<K, V>,
     writer: &mut W,
     mut key_encoder: IK,
     mut value_encoder: IV,
