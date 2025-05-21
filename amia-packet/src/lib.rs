@@ -1,7 +1,7 @@
-pub mod hsr;
+pub mod net_packet;
 
 #[cfg(feature = "kcp")]
-pub mod op;
+pub mod net_operation;
 
 #[derive(Debug)]
 pub enum PacketError {
