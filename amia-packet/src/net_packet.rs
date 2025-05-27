@@ -3,7 +3,7 @@ use crate::PacketError;
 #[cfg(feature = "tokio")]
 use tokio::io::AsyncReadExt;
 #[cfg(feature = "tokio")]
-use tokio::net::TcpStream;
+use tokio::io::AsyncWriteExt;
 
 use byteorder::{BE, ByteOrder};
 use std::mem::size_of;
@@ -31,7 +31,7 @@ const HS_END: usize = HS_START + HEAD_SIZE_LEN;
 const BS_START: usize = HS_END;
 const BS_END: usize = BS_START + BODY_SIZE_LEN;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct NetPacket {
     pub cmd: u16,
     pub head: Vec<u8>,
@@ -40,7 +40,22 @@ pub struct NetPacket {
 
 impl NetPacket {
     #[cfg(feature = "tokio")]
-    pub async fn read(stream: &mut TcpStream) -> std::io::Result<Self> {
+    pub async fn write(&self, stream: &mut (impl AsyncWriteExt + Unpin)) -> std::io::Result<()> {
+        const HEAD_MAGIC_U32: u32 = 0x9D74C714;
+        const TAIL_MAGIC_U32: u32 = 0xD7A152C8;
+
+        stream.write_u32(HEAD_MAGIC_U32).await?;
+        stream.write_u16(self.cmd).await?;
+        stream.write_u16(self.head.len() as u16).await?;
+        stream.write_u32(self.body.len() as u32).await?;
+        stream.write_all(&self.head).await?;
+        stream.write_all(&self.body).await?;
+        stream.write_u32(TAIL_MAGIC_U32).await?;
+        Ok(())
+    }
+
+    #[cfg(feature = "tokio")]
+    pub async fn read(stream: &mut (impl AsyncReadExt + Unpin)) -> std::io::Result<Self> {
         const HEAD_MAGIC_U32: u32 = 0x9D74C714;
         const TAIL_MAGIC_U32: u32 = 0xD7A152C8;
 
